@@ -776,6 +776,40 @@ filter:
             }
             inputSource.addEventListener("change", rerenderAndClearHash, false);
             inputSource.addEventListener("input", rerenderAndClearHash, false);
+            // Two-way sync with a YAML file when served by serve.js; a 404 means a static host.
+            let fileContent = null;
+            let saveTimer;
+            function saveToFile() {
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(() => {
+                    const body = inputSource.value;
+                    if (body === fileContent) {
+                        return;
+                    }
+                    fileContent = body;
+                    fetch("/file", { method: "PUT", body });
+                }, 300);
+            }
+            fetch("/file").then((r) => (r.ok ? r.text() : null)).then((text) => {
+                if (text === null) {
+                    return;
+                }
+                fileContent = text;
+                inputSource.value = text;
+                rerender();
+                inputSource.addEventListener("input", saveToFile, false);
+                new EventSource("/events").onmessage = (event) => {
+                    const next = JSON.parse(event.data);
+                    if (next === fileContent) {
+                        return;
+                    }
+                    fileContent = next;
+                    if (next !== inputSource.value) {
+                        inputSource.value = next;
+                        rerender();
+                    }
+                };
+            }).catch(() => {});
             inputSource.addEventListener("scroll", syncScroll, false);
             inputSource.addEventListener("select", syncScroll, false);
             inputSource.addEventListener("wheel", syncScroll, false);

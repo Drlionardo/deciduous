@@ -28,3 +28,7 @@ Example trees for #inspo are hosted in [/examples](./examples).
 
 #### Surrealism
 * [Thanksploitation](./examples/thanksploitation.yml) scenario from Rick and Morty ([blog post](https://kellyshortridge.com/blog/posts/rick-morty-thanksploitation-decision-tree/))
+
+## Local file sync
+
+`node serve.js tree.yaml` serves the app at http://localhost:8787 with two-way sync to the file: edits in the browser are written to the file, edits to the file (by an editor or an agent) appear in the browser. `node cli.js tree.yaml tree.svg` renders it.
